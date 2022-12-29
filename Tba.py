@@ -4,6 +4,8 @@
 class Level:
     def __init__(self):
         self.name = ""
+        self.description = None
+        self.gates = None
 
     #  defines level setup function, defines instances of level class
     def setup(self, name, gates, text):
@@ -15,18 +17,13 @@ class Level:
     def enter(self):
         print(self.description)
 
-        if len(self.gates) == 1:
-            print("there is a gate to ", end=' ')
-
-            gate_str = " "
-            gate_str = gate_str.join(self.gates)
-
-            print(gate_str)
-
-        elif len(self.gates) > 1:
+        # for loop to print gates in player location
+        # (weird error causing 'none' value to appear)
+        if len(self.gates) >= 1:
             print("there is a gate to ", end=' ')
             for g in self.gates:
                 g.print_gate()
+        print("\n", end=' ')
 
 
 # defines gate class
@@ -100,44 +97,46 @@ def sword_sequence():
     # defines players sword, adds default values to catch errors
     player_sword = Sword("claymore", "blood", "red")
 
+    print("You are offered a sword.\n")
+
     # asks user for input/type of Sword. Uses while loop to stop incorrect input breaking program
-    print("Type of Sword \n katana, claymore, dagger")
+    print("What type of sword. \n Options: katana, claymore, dagger")
 
     # puts player in loop to collect Sword type
     player_sword.sword_type = incorrect_answer_loop({"katana", "claymore", "dagger"})
 
-    print("\n Cool your Sword type is:", player_sword.sword_type, "\n")
+    print("Your sword type is:", player_sword.sword_type, "\n")
 
     # asks user input and stores as variable, lets player use whatever colour.
-    print("what colour Sword?\n")
+    print("What colour sword.")
     player_sword.colour = input()
 
-    print("\nCool, your Sword colour is:", player_sword.colour, "\n")
+    print("Your sword colour is:", player_sword.colour, "\n")
 
     # asks user what damage type they want, using a while loop for accepted input
-    print("What damage type?\n holy, blood, fire\n")
+    print("What damage type.\n Options: holy, blood, fire")
 
     # puts player in loop to collect damage type
     player_sword.damage_type = incorrect_answer_loop({"holy", "blood", "fire"})
 
     # prints Sword stats to player
-    print("\nCool, your  Sword type is", player_sword.sword_type, ", your Sword colour is",
-          player_sword.colour, ", and your Swords damage type is", player_sword.damage_type)
+    print("\nYour sword type is", player_sword.sword_type, ", your sword colour is",
+          player_sword.colour, ", and your swords damage type is", player_sword.damage_type, "\n")
 
 
 # defines commands in list
 commands = ["go (direction)", "look"]
+
+# begins sword sequence (disabled for bug testing)
+sword_sequence()
 
 # asks name and stores in player instance
 print("what is your name?")
 user_input = input(">")
 the_player = Player(user_input, start_area)
 
-# begins sword sequence (disabled for bug testing)
-# sword_sequence()
-
 # gives player information and area setting
-print("(Cry help for commands)\n")
+print("\n(Cry help for commands)")
 print(start_area.description)
 
 # starts game loop
@@ -157,4 +156,4 @@ while user_input != "exit":
 
     # gives player location information
     elif user_input == "look":
-        print(the_player.location.enter())
+        the_player.location.enter()
