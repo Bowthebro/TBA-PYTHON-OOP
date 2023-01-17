@@ -35,17 +35,14 @@ class Level:
         # for loop to print gate in player location
         if len(self.gates) >= 1:
             print("There are gates to:")
-            for g in self.gates:
-                g.print_gate()
+            for a in self.gates:
+                a.print_gate()
 
         # for loop to print items for use in a for loop
         if len(self.items) >= 1:
             print("There is", end=" ")
             for i in self.items:
                 i.print_item()
-
-        # newline so terminal looks better
-        print("\n")
 
     # removes item from level for use in take function
     def remove_item(self, item):
@@ -59,10 +56,29 @@ class Level:
 # defines gate class
 class Gate:
 
-    def __init__(self, direction, gate_to, locked):
+    def __init__(self, direction, gate_to, locked, key):
         self.gate_to = gate_to
         self.direction = direction
         self.locked = locked
+        self.key = key
+
+    # toggles lock on gate
+    def toggle_lock(self):
+        self.locked = not self.locked
+
+    def unlock(self, list_1):
+        success = False
+        for i in list_1:
+            if self.key == i.name:
+                self.locked = False
+                print("You turn the key and the %s gate is blown open by a gust of wind." % self.direction)
+                success = True
+        if not success and self.locked:
+            print("You do not have the key for this door.")
+
+    # returns locked boolean
+    def is_locked(self):
+        return self.locked
 
     # returns direction of gate
     def is_gate(self, text):
@@ -127,7 +143,7 @@ class Item:
 
 
 # defines commands in list
-commands = ["go (direction)", "look", "take (item)", "inventory", "drop (item)"]
+commands = "go 'direction', look, take 'item', 'inventory', drop 'item' and unlock"
 
 # initialises levels
 start_area = Level()
@@ -142,35 +158,35 @@ player_sword = Item("sword")
 rusted_key = Item("rusted key")
 
 # start area setup
-gate1 = Gate("north", deep_forest_area, False)
+gate1 = Gate("north", deep_forest_area, False, "")
 start_area.setup("forest", [gate1], "You are in a dusk lit forest surrounded by trees. "
                                     "The only direction is deeper into the forest.", [player_sword])
 
 # deep forest area setup
-gate1 = Gate("south", start_area, False)
-gate2 = Gate("north", cross_road_area, False)
+gate1 = Gate("south", start_area, False, "")
+gate2 = Gate("north", cross_road_area, False, "")
 deep_forest_area.setup("deep forest", [gate1, gate2], "You are in a seemingly endless tunnel of dark oak trees.", [])
 
 # cross road area setup
-gate1 = Gate("south", deep_forest_area, False)
-gate2 = Gate("north", moldy_skeleton_area, True)
-gate3 = Gate("west", dense_shrubs_area, False)
-gate4 = Gate("east", old_tree_area, False)
+gate1 = Gate("south", deep_forest_area, False, "")
+gate2 = Gate("north", moldy_skeleton_area, True, "rusted key")
+gate3 = Gate("west", dense_shrubs_area, False, "")
+gate4 = Gate("east", old_tree_area, False, "")
 cross_road_area.setup("cross road area", [gate2, gate4, gate1, gate3], "You are at a crossroads. "
                                                                        "The path spirals into three directions."
                                                                        " It is suddenly dark. ", [])
 
-gate1 = Gate("east", cross_road_area, False)
+gate1 = Gate("east", cross_road_area, False, "")
 dense_shrubs_area.setup("dense shrubs area", [gate1], "You are in an area with dense shrubbery."
-                                                      "The only direction is backwards", [])
+                                                      "The only direction is back", [])
 
-gate1 = Gate("west", cross_road_area, False)
+gate1 = Gate("west", cross_road_area, False, "")
 old_tree_area.setup("old tree area", [gate1],
-                    "You see a large old looking tree. Something is hanging off a branch", [rusted_key])
+                    "You see a large old tree. Something is hanging off a branch", [rusted_key])
 
-gate1 = Gate("south", cross_road_area, False)
-moldy_skeleton_area.setup("moldy skeleton area", [gate1], "There is a skeleton covered in mold, the path is too"
-                                                          "tight to go around it", [])
+gate1 = Gate("south", cross_road_area, False, "")
+moldy_skeleton_area.setup("moldy skeleton area", [gate1], "There is a skeleton covered in mold, the path is too "
+                                                          "tight to walk around it", [])
 
 
 # END OF CLASSES AND INITIALISING
@@ -216,13 +232,13 @@ def sword_sequence():
     # puts player in loop to collect damage type
     player_sword.damage_type = incorrect_answer_loop({"holy", "blood", "fire"})
 
-    print("Your swords damage type is:", player_sword.damage_type, "\n")
+    print("Your swords damage type is:", player_sword.damage_type)
 
     print("Your sword is finished.\n")
 
 
 # begins sword sequence
-# sword_sequence()
+sword_sequence()
 
 # asks name and stores in player instance
 print("What is your name.")
@@ -268,3 +284,7 @@ while user_input != "exit":
     # takes items from player and gives to level
     elif "drop" in user_input:
         the_player.drop(user_input)
+
+    elif "unlock" in user_input:
+        for g in the_player.location.gates:
+            g.unlock(the_player.inventory)
