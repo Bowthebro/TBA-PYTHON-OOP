@@ -16,62 +16,64 @@
 # defines level class
 class Level:
     def __init__(self):
-        self.name = ""
-        self.description = None
-        self.gates = None
-        self.items = None
+        # defining variables to avoid pep-8 violations
+        self.level_name = None
+        self.level_description = None
+        self.level_gates = None
+        self.level_items = None
 
     #  defines level setup function, defines instances of level class
-    def setup(self, name, gates, text, items):
-        self.name = name
-        self.gates = gates
-        self.description = text
-        self.items = items
+    def setup(self, level_name, level_gates, level_description, level_items):
+        self.level_name = level_name  # defines name string for level
+        self.level_gates = level_gates  # defines list of gates for level
+        self.level_description = level_description  # defines description string for level
+        self.level_items = level_items  # defines list of items in level
 
     # defines enter function, gives player info of area
     def enter(self):
-        print(self.description)
+        print(self.level_description)
 
         # for loop to print gate in player location
-        if len(self.gates) >= 1:
+        if len(self.level_gates) >= 1:
             print("There are gates to:")
-            for a in self.gates:
+            for a in self.level_gates:
                 a.print_gate()
 
         # for loop to print items for use in a for loop
-        if len(self.items) >= 1:
+        if len(self.level_items) >= 1:
             print("There is", end=" ")
-            for i in self.items:
+            for i in self.level_items:
                 i.print_item()
 
     # removes item from level for use in take function
     def remove_item(self, item):
-        self.items.remove(item)
+        self.level_items.remove(item)
 
     # adds item to level for use in drop function
     def add_item(self, item):
-        self.items.append(item)
+        self.level_items.append(item)
 
 
 # defines gate class
 class Gate:
 
-    def __init__(self, direction, gate_to, locked, key):
-        self.gate_to = gate_to
-        self.direction = direction
-        self.locked = locked
-        self.key = key
+    def __init__(self, gate_direction, gate_to, locked, key):
+        self.gate_to = gate_to  # defines the level the gate leads to
+        self.gate_direction = gate_direction  # defines the direction the gate points to
+        self.locked = locked  # defines a boolean for if the gate is locked
+        self.key = key  # defines a string for what key is needed for lock
 
     # toggles lock on gate
     def toggle_lock(self):
         self.locked = not self.locked
 
-    def unlock(self, list_1):
+    # defines unlock function for locked gates
+    def unlock(self, gate_list):
         success = False
-        for i in list_1:
-            if self.key == i.name:
+        for i in gate_list:
+            if self.key == i.item_name:
                 self.locked = False
-                print("You turn the key and the %s gate is blown open by a gust of wind." % self.direction)
+                print("You turn the key and the %s gate is blown open by a gust of wind." % self.gate_direction)
                 success = True
         if not success and self.locked:
             print("You do not have the key for this door.")
@@ -82,33 +84,33 @@ class Gate:
 
     # returns direction of gate
     def is_gate(self, text):
-        return self.direction in text
+        return self.gate_direction in text
 
     # prints direction of gate
     def print_gate(self):
-        print("the %s." % self.direction)
+        print("the %s." % self.gate_direction)
 
 
 # defines player class
 class Player:
 
-    def __init__(self, name, player_level):
-        self.health = 100
-        self.name = name
-        self.location = player_level
-        self.inventory = []
+    def __init__(self, player_name, player_level):
+        self.player_health = 100  # defines player health as 100
+        self.player_name = player_name  # defines players name
+        self.player_location = player_level  # defines where the player is located
+        self.inventory = []  # defines the players inventory
 
     # changes player location
     def move(self, player_level):
-        self.location = player_level
+        self.player_location = player_level
 
     # adds items to player inventory and removes from level
     def take(self, take_user_input):
-        for i in self.location.items:
-            if i.name in take_user_input:
+        for i in self.player_location.level_items:
+            if i.item_name in take_user_input:
                 self.inventory.append(i)
-                print("you take a %s" % i.name)
-                self.location.remove_item(i)
+                print("you take a %s" % i.item_name)
+                self.player_location.remove_item(i)
             else:
                 print("?")
 
@@ -116,10 +118,10 @@ class Player:
     def drop(self, drop_user_input):
         success = False
         for i in self.inventory:
-            if i.name in drop_user_input:
+            if i.item_name in drop_user_input:
                 self.inventory.remove(i)
-                self.location.add_item(i)
-                print("You drop the %s" % i.name)
+                self.player_location.add_item(i)
+                print("You drop the %s" % i.item_name)
                 success = True
         if not success:
             print("?")
@@ -128,18 +130,18 @@ class Player:
     def print_inventory(self):
         print("Your inventory: ")
         for i in self.inventory:
-            print("%s," % i.name)
+            print("%s," % i.item_name)
 
 
 # defines item class
 class Item:
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, item_name):
+        self.item_name = item_name  # defines items name
 
     # function called for use in a for loop to print item
     def print_item(self):
-        print("a %s." % self.name)
+        print("a %s." % self.item_name)
 
 
 # defines commands in list
@@ -162,6 +164,8 @@ gate1 = Gate("north", deep_forest_area, False, "")
 start_area.setup("forest", [gate1], "You are in a dusk lit forest surrounded by trees. "
                                     "The only direction is deeper into the forest.", [player_sword])
 
+# the level setup function is given a name variable, a list of gates in the level, a description string and items list
+# gates are given four variables, direction, where the gate goes to, if the gate is locked and what the gates key is
 # deep forest area setup
 gate1 = Gate("south", start_area, False, "")
 gate2 = Gate("north", cross_road_area, False, "")
@@ -238,7 +242,7 @@ def sword_sequence():
 
 
 # begins sword sequence
-sword_sequence()
+# sword_sequence()
 
 # asks name and stores in player instance
 print("What is your name.")
@@ -247,7 +251,7 @@ the_player = Player(user_input, start_area)
 
 # gives player information and area setting
 print("\n(Cry help for commands)")
-print(start_area.description)
+print(start_area.level_description)
 
 # starts game loop
 while user_input != "exit":
@@ -256,14 +260,14 @@ while user_input != "exit":
     user_input = str.lower(input(">"))
 
     # looks for direction in input and if the direction is valid, moves player in that direction
-    for d in the_player.location.gates:
+    for d in the_player.player_location.level_gates:
         if d.is_gate(user_input):
             if d.locked:
                 print("The gate rattles and doesnt budge.")
 
             else:
                 the_player.move(d.gate_to)
-                print(the_player.location.description)
+                print(the_player.player_location.level_description)
 
     # tells player the commands when asked
     if "help" in user_input:
@@ -271,7 +275,7 @@ while user_input != "exit":
 
     # gives player location information
     elif "look" in user_input:
-        the_player.location.enter()
+        the_player.player_location.enter()
 
     # takes items from level and gives to player
     elif "take" in user_input:
@@ -286,5 +290,5 @@ while user_input != "exit":
         the_player.drop(user_input)
 
     elif "unlock" in user_input:
-        for g in the_player.location.gates:
+        for g in the_player.player_location.level_gates:
             g.unlock(the_player.inventory)
