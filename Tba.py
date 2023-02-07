@@ -11,7 +11,11 @@
 #     start     #
 #   #   #   #   #
 
+# MODULE IMPORT
+import random
+
 # START OF CLASSES AND INITIALISING
+
 
 # defines level class
 class Level:
@@ -21,13 +25,15 @@ class Level:
         self.level_description = None
         self.level_gates = None
         self.level_items = None
+        self.level_enemies = None
 
     #  defines level setup function, defines instances of level class
-    def setup(self, level_name, level_gates, level_description, level_items):
+    def setup(self, level_name, level_gates, level_description, level_items, level_enemies):
         self.level_name = level_name  # defines name string for level
         self.level_gates = level_gates  # defines list of gates for level
         self.level_description = level_description  # defines description string for level
         self.level_items = level_items  # defines list of items in level
+        self.level_enemies = level_enemies  # defines list of enemies in level
 
     # defines enter function, gives player info of area
     def enter(self):
@@ -36,14 +42,19 @@ class Level:
         # for loop to print gate in player location
         if len(self.level_gates) >= 1:
             print("There are gates to:")
-            for a in self.level_gates:
-                a.print_gate()
+            for ga in self.level_gates:
+                ga.print_gate()
 
         # for loop to print items for use in a for loop
         if len(self.level_items) >= 1:
             print("There is", end=" ")
             for i in self.level_items:
                 i.print_item()
+
+        if len(self.level_enemies) >= 1:
+            print("There is", end=" ")
+            for e in self.level_enemies:
+                e.print_enemy()
 
     # removes item from level for use in take function
     def remove_item(self, item):
@@ -144,6 +155,23 @@ class Item:
         print("a %s." % self.item_name)
 
 
+class Enemy:
+
+    def __init__(self, enemy_name, enemy_health, enemy_damage, enemy_spawn):
+        self.enemy_name = enemy_name
+        self.enemy_health = enemy_health
+        self.enemy_damage = enemy_damage
+        self.enemy_spawn = enemy_spawn
+
+    def randomise_spawn(self, enemy_locations):
+        random_spawn = random.choice(enemy_locations)
+        Level.level_enemies = random_spawn
+        self.enemy_spawn = random_spawn
+
+    def print_enemy(self):
+        print("a %s." % self.enemy_name)
+
+
 # defines commands in list
 commands = "go 'direction', look, take 'item', 'inventory', drop 'item' and unlock"
 
@@ -155,21 +183,31 @@ moldy_skeleton_area = Level()
 dense_shrubs_area = Level()
 old_tree_area = Level()
 
+# defines list of spawn areas, used for enemies
+enemy_spawn_areas = [deep_forest_area, cross_road_area, dense_shrubs_area, old_tree_area]
+
 # initialises items
 player_sword = Item("sword")
 rusted_key = Item("rusted key")
 
+# initialises enemies
+skeleton = Enemy("skeleton", 100, 25, moldy_skeleton_area)
+
+wolf = Enemy("wolf", 50, 15, [])
+wolf.randomise_spawn(enemy_spawn_areas)
+
 # start area setup
 gate1 = Gate("north", deep_forest_area, False, "")
 start_area.setup("forest", [gate1], "You are in a dusk lit forest surrounded by trees. "
-                                    "The only direction is deeper into the forest.", [player_sword])
+                                    "The only direction is deeper into the forest.", [player_sword], [])
 
 # the level setup function is given a name variable, a list of gates in the level, a description string and items list
 # gates are given four variables, direction, where the gate goes to, if the gate is locked and what the gates key is
 # deep forest area setup
 gate1 = Gate("south", start_area, False, "")
 gate2 = Gate("north", cross_road_area, False, "")
-deep_forest_area.setup("deep forest", [gate1, gate2], "You are in a seemingly endless tunnel of dark oak trees.", [])
+deep_forest_area.setup("deep forest", [gate1, gate2], "You are in a seemingly endless tunnel of dark oak trees.", [],
+                       [])
 
 # cross road area setup
 gate1 = Gate("south", deep_forest_area, False, "")
@@ -178,19 +216,19 @@ gate3 = Gate("west", dense_shrubs_area, False, "")
 gate4 = Gate("east", old_tree_area, False, "")
 cross_road_area.setup("cross road area", [gate2, gate4, gate1, gate3], "You are at a crossroads. "
                                                                        "The path spirals into three directions."
-                                                                       " It is suddenly dark. ", [])
+                                                                       " It is suddenly dark. ", [], [])
 
 gate1 = Gate("east", cross_road_area, False, "")
 dense_shrubs_area.setup("dense shrubs area", [gate1], "You are in an area with dense shrubbery."
-                                                      "The only direction is back", [])
+                                                      "The only direction is back", [], [])
 
 gate1 = Gate("west", cross_road_area, False, "")
 old_tree_area.setup("old tree area", [gate1],
-                    "You see a large old tree. Something is hanging off a branch", [rusted_key])
+                    "You see a large old tree. Something is hanging off a branch", [rusted_key], [])
 
 gate1 = Gate("south", cross_road_area, False, "")
 moldy_skeleton_area.setup("moldy skeleton area", [gate1], "There is a skeleton covered in mold, the path is too "
-                                                          "tight to walk around it", [])
+                                                          "tight to walk around it", [], [skeleton])
 
 
 # END OF CLASSES AND INITIALISING
