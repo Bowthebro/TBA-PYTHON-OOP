@@ -51,10 +51,9 @@ class Level:
             for i in self.level_items:
                 i.print_item()
 
-        if len(self.level_enemies) >= 1:
+        if self.level_enemies:
             print("There is", end=" ")
-            for e in self.level_enemies:
-                e.print_enemy()
+            self.level_enemies.print_enemy()
 
     # removes item from level for use in take function
     def remove_item(self, item):
@@ -104,6 +103,7 @@ class Gate:
 
 # defines player class
 class Player:
+    player_damage = 25
 
     def __init__(self, player_name, player_level):
         self.player_health = 100  # defines player health as 100
@@ -143,6 +143,18 @@ class Player:
         for i in self.inventory:
             print("%s," % i.item_name)
 
+    # attack function, randomly wins or loses battle and apply damage to losing side
+    def attack(self, enemy):
+        if random.randint(0, 1) == 1:
+            self.player_take_damage(enemy)
+
+        else:
+            enemy.enemy_take_damage(the_player)
+
+    def player_take_damage(self, enemy):
+        self.player_health = self.player_health - enemy.enemy_damage
+        print("You take %s damage" % enemy.enemy_damage)
+
 
 # defines item class
 class Item:
@@ -170,6 +182,10 @@ class Enemy:
 
     def print_enemy(self):
         print("a %s." % self.enemy_name)
+
+    def enemy_take_damage(self, player):
+        self.enemy_health = self.enemy_health - player.player_damage
+        print("You swing your sword and hit the %s for" % self.enemy_name, player.player_damage, "damage")
 
 
 # defines commands in list
@@ -228,7 +244,7 @@ old_tree_area.setup("old tree area", [gate1],
 
 gate1 = Gate("south", cross_road_area, False, "")
 moldy_skeleton_area.setup("moldy skeleton area", [gate1], "There is a skeleton covered in mold, the path is too "
-                                                          "tight to walk around it", [], [skeleton])
+                                                          "tight to walk around it", [], skeleton)
 
 
 # END OF CLASSES AND INITIALISING
@@ -285,11 +301,11 @@ def sword_sequence():
 # asks name and stores in player instance
 print("What is your name.")
 user_input = input(">")
-the_player = Player(user_input, start_area)
+the_player = Player(user_input, moldy_skeleton_area)
 
 # gives player information and area setting
 print("\n(Cry help for commands)")
-print(start_area.level_description)
+print(the_player.player_location.level_description)
 
 # starts game loop
 while user_input != "exit":
@@ -330,3 +346,6 @@ while user_input != "exit":
     elif "unlock" in user_input:
         for g in the_player.player_location.level_gates:
             g.unlock(the_player.inventory)
+
+    elif "attack" in user_input:
+        the_player.attack(the_player.player_location.level_enemies)
