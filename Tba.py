@@ -63,6 +63,10 @@ class Level:
     def add_item(self, item):
         self.level_items.append(item)
 
+    # removes enemy from level
+    def remove_enemy(self):
+        self.level_enemies = None
+
 
 # defines gate class
 class Gate:
@@ -103,7 +107,7 @@ class Gate:
 
 # defines player class
 class Player:
-    player_damage = 25
+    player_damage = 45
 
     def __init__(self, player_name, player_level):
         self.player_health = 100  # defines player health as 100
@@ -145,15 +149,17 @@ class Player:
 
     # attack function, randomly wins or loses battle and apply damage to losing side
     def attack(self, enemy):
-        if random.randint(0, 1) == 1:
+        if random.randint(0, 2) == 1:
             self.player_take_damage(enemy)
 
         else:
             enemy.enemy_take_damage(the_player)
 
     def player_take_damage(self, enemy):
+        player_damage_messages = ["shin", "head", "forearm"]
         self.player_health = self.player_health - enemy.enemy_damage
-        print("You take %s damage" % enemy.enemy_damage)
+        print("The %s" % enemy.enemy_name, "charges forward and your %s is injured"
+              % random.choice(player_damage_messages))
 
 
 # defines item class
@@ -184,8 +190,9 @@ class Enemy:
         print("a %s." % self.enemy_name)
 
     def enemy_take_damage(self, player):
+        enemy_damage_messages = ["face", "abdomen", "leg"]
         self.enemy_health = self.enemy_health - player.player_damage
-        print("You swing your sword and hit the %s for" % self.enemy_name, player.player_damage, "damage")
+        print("You swing your sword and hit the %s in the" % self.enemy_name, random.choice(enemy_damage_messages))
 
 
 # defines commands in list
@@ -310,42 +317,57 @@ print(the_player.player_location.level_description)
 # starts game loop
 while user_input != "exit":
 
-    # asks user for input and stores as lower case
-    user_input = str.lower(input(">"))
+    while the_player.player_health > 0:
+        # asks user for input and stores as lower case
+        user_input = str.lower(input(">"))
 
-    # looks for direction in input and if the direction is valid, moves player in that direction
-    for d in the_player.player_location.level_gates:
-        if d.is_gate(user_input):
-            if d.locked:
-                print("The gate rattles and doesnt budge.")
+        # looks for direction in input and if the direction is valid, moves player in that direction
+        for d in the_player.player_location.level_gates:
+            if d.is_gate(user_input):
+                if d.locked:
+                    print("The gate rattles and doesnt budge.")
 
+                else:
+                    the_player.move(d.gate_to)
+                    print(the_player.player_location.level_description)
+
+        # checks for dead enemy and removes from level is health is below or equal to zero
+        if the_player.player_location.level_enemies == 1:
+            if the_player.player_location.level_enemies.enemy_health <= 0:
+                print("the %s perishes" % the_player.player_location.level_enemies.enemy_name)
+                the_player.player_location.remove_enemy()
             else:
-                the_player.move(d.gate_to)
-                print(the_player.player_location.level_description)
+                break
 
-    # tells player the commands when asked
-    if "help" in user_input:
-        print("the commands are:", commands)
+        # tells player the commands when asked
+        elif "help" in user_input:
+            print("the commands are:", commands)
 
-    # gives player location information
-    elif "look" in user_input:
-        the_player.player_location.enter()
+        # gives player location information
+        elif "look" in user_input:
+            the_player.player_location.enter()
 
-    # takes items from level and gives to player
-    elif "take" in user_input:
-        the_player.take(user_input)
+        # takes items from level and gives to player
+        elif "take" in user_input:
+            the_player.take(user_input)
 
-    # prints inventory to player
-    elif "inventory" in user_input:
-        the_player.print_inventory()
+        # prints inventory to player
+        elif "inventory" in user_input:
+            the_player.print_inventory()
 
-    # takes items from player and gives to level
-    elif "drop" in user_input:
-        the_player.drop(user_input)
+        # takes items from player and gives to level
+        elif "drop" in user_input:
+            the_player.drop(user_input)
 
-    elif "unlock" in user_input:
-        for g in the_player.player_location.level_gates:
-            g.unlock(the_player.inventory)
+        elif "unlock" in user_input:
+            for g in the_player.player_location.level_gates:
+                g.unlock(the_player.inventory)
 
-    elif "attack" in user_input:
-        the_player.attack(the_player.player_location.level_enemies)
+        elif "attack" in user_input:
+            the_player.attack(the_player.player_location.level_enemies)
+
+        elif "health" in user_input:
+            print(the_player.player_health)
+
+    print("\n##GAME OVER##\n  (you suck)")
+    break
